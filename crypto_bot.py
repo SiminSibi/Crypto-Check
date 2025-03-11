@@ -315,34 +315,69 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     items_per_page = 10
     total_pages = (len(coins) + items_per_page - 1) // items_per_page
 
-    if query.data.startswith(('price_', 'alert_', 'chart_', 'convert_to_irr_')):
-        action, page = query.data.split('_')[0], int(query.data.split('_')[1])
-        start_idx = page * items_per_page
-        end_idx = min(start_idx + items_per_page, len(coins))
-        keyboard = []
-        for i in range(start_idx, end_idx, 2):
-            row = []
-            row.append(InlineKeyboardButton(
-                CURRENCIES[coins[i]] if lang == 'fa' else coins[i].capitalize(),
-                callback_data=f"{action}_{coins[i]}"
-            ))
-            if i + 1 < end_idx:
+    # Split query.data and handle both cases (pagination and coin selection)
+    data_parts = query.data.split('_')
+    action = data_parts[0]
+
+    if action in ('price', 'alert', 'chart', 'convert_to_irr') and len(data_parts) == 2:
+        try:
+            page = int(data_parts[1])  # Pagination case (e.g., price_0)
+            start_idx = page * items_per_page
+            end_idx = min(start_idx + items_per_page, len(coins))
+            keyboard = []
+            for i in range(start_idx, end_idx, 2):
+                row = []
                 row.append(InlineKeyboardButton(
-                    CURRENCIES[coins[i+1]] if lang == 'fa' else coins[i+1].capitalize(),
-                    callback_data=f"{action}_{coins[i+1]}"
+                    CURRENCIES[coins[i]] if lang == 'fa' else coins[i].capitalize(),
+                    callback_data=f"{action}_{coins[i]}"
                 ))
-            keyboard.append(row)
-        nav_row = []
-        if page > 0:
-            nav_row.append(InlineKeyboardButton(LANGUAGES[lang]['prev_page'], callback_data=f"{action}_{page-1}"))
-        if page < total_pages - 1:
-            nav_row.append(InlineKeyboardButton(LANGUAGES[lang]['next_page'], callback_data=f"{action}_{page+1}"))
-        if nav_row:
-            keyboard.append(nav_row)
-        await query.edit_message_text(
-            LANGUAGES[lang]['select_coin'].format(page=page+1, total_pages=total_pages),
-            reply_markup=InlineKeyboardMarkup(keyboard)
-        )
+                if i + 1 < end_idx:
+                    row.append(InlineKeyboardButton(
+                        CURRENCIES[coins[i+1]] if lang == 'fa' else coins[i+1].capitalize(),
+                        callback_data=f"{action}_{coins[i+1]}"
+                    ))
+                keyboard.append(row)
+            nav_row = []
+            if page > 0:
+                nav_row.append(InlineKeyboardButton(LANGUAGES[lang]['prev_page'], callback_data=f"{action}_{page-1}"))
+            if page < total_pages - 1:
+                nav_row.append(InlineKeyboardButton(LANGUAGES[lang]['next_page'], callback_data=f"{action}_{page+1}"))
+            if nav_row:
+                keyboard.append(nav_row)
+            await query.edit_message_text(
+                LANGUAGES[lang]['select_coin'].format(page=page+1, total_pages=total_pages),
+                reply_markup=InlineKeyboardMarkup(keyboard)
+            )
+        except ValueError:  # Coin selection case (e.g., price_near)
+            coin = data_parts[1]
+            if action == 'price':
+                price, change = get_crypto_price(coin)
+                if price:
+                    coin_name = CURRENCIES[coin] if lang == 'fa' else coin.capitalize()
+                    await query.edit_message_text(
+                        f"{LANGUAGES[lang]['current_price'].format(coin=coin_name, price=price)}\n"
+                        f"{LANGUAGES[lang]['change_24h'].format(change=change)}"
+                    )
+            elif action == 'alert':
+                context.user_data['alert_coin'] = coin
+                coin_name = CURRENCIES[coin] if lang == 'fa' else coin.capitalize()
+                await query.edit_message_text(LANGUAGES[lang]['enter_price'].format(coin=coin_name))
+            elif action == 'chart':
+                coin_name = CURRENCIES[coin] if lang == 'fa' else coin.capitalize()
+                chart_url = f"https://www.tradingview.com/chart/?symbol={coin.upper()}USD"
+                await query.edit_message_text(
+                    LANGUAGES[lang]['chart_link'].format(coin=coin_name, url=chart_url)
+                )
+            elif action == 'convert_to_irr':
+                price, change = get_crypto_price(coin)
+                if price:
+                    price_irr = int(price * USD_TO_IRR)
+                    coin_name = CURRENCIES[coin] if lang == 'fa' else coin.capitalize()
+                    await query.edit_message_text(
+                        f"{LANGUAGES[lang]['current_price'].format(coin=coin_name, price=price)}\n"
+                        f"{LANGUAGES[lang]['price_in_irr'].format(coin=coin_name, price_irr=price_irr)}\n"
+                        f"{LANGUAGES[lang]['change_24h'].format(change=change)}"
+                    )
 
     elif query.data == 'alerts_list':
         alerts = storage.alerts.get(user_id, [])
