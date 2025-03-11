@@ -5,7 +5,8 @@ from telegram.ext import Application, CommandHandler, CallbackQueryHandler, Cont
 import requests
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from datetime import datetime
-import json
+import psycopg2
+from psycopg2.extras import RealDictCursor
 
 # Logging configuration
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -29,7 +30,7 @@ CURRENCIES = {
     'thorchain': 'تورچین (RUNE)', 'lido-dao': 'لیدو دائو (LDO)', 'render-token': 'رندر (RNDR)', 'immutable-x': 'ایمیوتبل ایکس (IMX)',
     'celestia': 'سلستیا (TIA)', 'sui': 'سوی (SUI)', 'bittensor': 'بیت‌تنسور (TAO)', 'kaspa': 'کاسپا (KAS)',
     'pepe': 'پپه (PEPE)', 'dydx': 'دی‌وای‌دی‌ایکس (DYDX)', 'worldcoin-wld': 'ورلدکوین (WLD)', 'cronos': 'کرونوس (CRO)',
-    'kava': 'کاوا (KAVA)', 'flow': 'فلو (FLOW)', 'gala': 'گالا (GALA)', 'eos': 'ایاس (EOS)',
+    'kava': 'کاوا (KAVA)', 'flow': 'فلو (FLOW)', 'gala': 'گالا (GALA)', 'eos865': 'ایاس (EOS)',
     'tezos': 'تزوس (XTZ)', 'neo': 'نئو (NEO)', 'iota': 'آیوتا (IOTA)', 'elrond-erd-2': 'الروند (EGLD)',
     'chiliz': 'چلیز (CHZ)', 'oasis-network': 'اوئیسیس (ROSE)', 'mina-protocol': 'مینا (MINA)', 'klaytn': 'کلایتن (KLAY)',
     'terra-luna': 'ترا لونا (LUNA)', 'axie-infinity': 'اکسی اینفینیتی (AXS)', 'decentraland': 'دیسنترالند (MANA)', 'sand': 'سندباکس (SAND)',
@@ -118,7 +119,7 @@ LANGUAGES = {
         'chart_link': "مشاهده نمودار {coin}: {url}",
         'daily_on': "روشن",
         'daily_off': "خاموش",
-        'daily_report_text': "📅 گزارش روزانه کریپto:",
+        'daily_report_text': "📅 گزارش روزانه کریپتو:",
         'search_prompt': "نام ارز را وارد کنید (فارسی یا انگلیسی):",
         'search_result': "پیدا شد: {coin}",
         'search_no_result': "ارزی پیدا نشد!",
@@ -141,23 +142,55 @@ LANGUAGES = {
     }
 }
 
-# Data storage with JSON
+# Data storage with PostgreSQL
 class Storage:
     def __init__(self):
-        self.users = {}
-        self.alerts = {}
+        self.conn = psycopg2.connect(os.getenv('DATABASE_URL'), cursor_factory=RealDictCursor)
+        self.create_tables()
         self.load_data()
 
+    def create_tables(self):
+        with self.conn.cursor() as cur:
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS users (
+                    user_id TEXT PRIMARY KEY,
+                    lang TEXT DEFAULT 'en',
+                    daily_report BOOLEAN DEFAULT FALSE,
+                    first_name TEXT,
+                    last_name TEXT
+                );
+                CREATE TABLE IF NOT EXISTS alerts (
+                    id SERIAL PRIMARY KEY,
+                    user_id TEXT,
+                    coin TEXT,
+                    price REAL,
+                    original_price REAL,
+                    FOREIGN KEY (user_id) REFERENCES users(user_id)
+                );
+            """)
+            self.conn.commit()
+
     def load_data(self):
-        if os.path.exists('/app/data.json'):  # For Railway Volume
-            with open('/app/data.json', 'r') as f:
-                data = json.load(f)
-                self.users = data.get('users', {})
-                self.alerts = data.get('alerts', {})
+        with self.conn.cursor() as cur:
+            cur.execute("SELECT * FROM users")
+            self.users = {row['user_id']: dict(row) for row in cur.fetchall()}
+            cur.execute("SELECT * FROM alerts")
+            self.alerts = {}
+            for row in cur.fetchall():
+                user_id = row['user_id']
+                if user_id not in self.alerts:
+                    self.alerts[user_id] = []
+                self.alerts[user_id].append({
+                    'coin': row['coin'],
+                    'price': row['price'],
+                    'original_price': row['original_price']
+                })
 
     def save_data(self):
-        with open('/app/data.json', 'w') as f:
-            json.dump({'users': self.users, 'alerts': self.alerts}, f)
+        self.conn.commit()
+
+    def close(self):
+        self.conn.close()
 
 storage = Storage()
 
@@ -189,14 +222,19 @@ async def check_alerts(context: ContextTypes.DEFAULT_TYPE):
         logger.error(f"Error fetching prices in check_alerts: {e}")
         return
 
-    for user_id, alerts in list(storage.alerts.items()):
-        lang = storage.users.get(str(user_id), {}).get('lang', 'en')
-        for alert in alerts[:]:
-            coin, target_price = alert['coin'], alert['price']
+    with storage.conn.cursor() as cur:
+        cur.execute("SELECT * FROM alerts")
+        alerts = cur.fetchall()
+        for alert in alerts:
+            user_id = alert['user_id']
+            coin = alert['coin']
+            target_price = alert['price']
+            original_price = alert['original_price']
             current_price = current_prices.get(coin)
+            lang = storage.users.get(user_id, {}).get('lang', 'en')
             if current_price and (
-                (target_price > alert['original_price'] and current_price >= target_price) or
-                (target_price < alert['original_price'] and current_price <= target_price)
+                (target_price > original_price and current_price >= target_price) or
+                (target_price < original_price and current_price <= target_price)
             ):
                 await context.bot.send_message(
                     chat_id=user_id,
@@ -206,8 +244,9 @@ async def check_alerts(context: ContextTypes.DEFAULT_TYPE):
                         current=current_price
                     )
                 )
-                alerts.remove(alert)
-    storage.save_data()
+                cur.execute("DELETE FROM alerts WHERE id = %s", (alert['id'],))
+        storage.save_data()
+    storage.load_data()
 
 # Daily report
 async def daily_report(context: ContextTypes.DEFAULT_TYPE):
@@ -233,19 +272,23 @@ async def daily_report(context: ContextTypes.DEFAULT_TYPE):
 # Start command
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = str(update.effective_user.id)
-    first_name = update.effective_user.first_name or "Unknown"  # Get first name
-    last_name = update.effective_user.last_name or "Unknown"   # Get last name
-    if user_id not in storage.users:
-        storage.users[user_id] = {'lang': 'en', 'daily_report': False, 'first_name': first_name, 'last_name': last_name}
-    elif 'first_name' not in storage.users[user_id] or 'last_name' not in storage.users[user_id]:
-        storage.users[user_id]['first_name'] = first_name
-        storage.users[user_id]['last_name'] = last_name
+    first_name = update.effective_user.first_name or "Unknown"
+    last_name = update.effective_user.last_name or "Unknown"
+    
+    with storage.conn.cursor() as cur:
+        cur.execute("""
+            INSERT INTO users (user_id, lang, daily_report, first_name, last_name)
+            VALUES (%s, %s, %s, %s, %s)
+            ON CONFLICT (user_id) DO UPDATE SET first_name = %s, last_name = %s
+        """, (user_id, 'en', False, first_name, last_name, first_name, last_name))
+        storage.save_data()
+    
+    storage.load_data()
     lang = storage.users[user_id]['lang']
     daily_status = LANGUAGES[lang]['daily_on'] if storage.users[user_id]['daily_report'] else LANGUAGES[lang]['daily_off']
     
-    # Log current data
-    logger.info(f"Current data: {json.dumps(storage.users, indent=2, ensure_ascii=False)}")
-    logger.info(f"Current alerts: {json.dumps(storage.alerts, indent=2, ensure_ascii=False)}")
+    logger.info(f"Current data: {storage.users}")
+    logger.info(f"Current alerts: {storage.alerts}")
     
     keyboard = [
         [InlineKeyboardButton(LANGUAGES[lang]['price'], callback_data='price_0'),
@@ -261,7 +304,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text(LANGUAGES[lang]['welcome'], reply_markup=reply_markup)
-    storage.save_data()
 
 # Button handler
 async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -317,8 +359,13 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         alert_index = int(query.data.split('_')[2])
         alerts = storage.alerts.get(user_id, [])
         if 0 <= alert_index < len(alerts):
-            alerts.pop(alert_index)
-            storage.save_data()
+            with storage.conn.cursor() as cur:
+                cur.execute("SELECT id FROM alerts WHERE user_id = %s ORDER BY id", (user_id,))
+                alert_ids = [row['id'] for row in cur.fetchall()]
+                if alert_index < len(alert_ids):
+                    cur.execute("DELETE FROM alerts WHERE id = %s", (alert_ids[alert_index],))
+                    storage.save_data()
+                    storage.load_data()
         await button(update, context)
 
     elif query.data == 'language':
@@ -368,8 +415,10 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
 
     elif query.data == 'toggle_daily':
-        storage.users[user_id]['daily_report'] = not storage.users[user_id].get('daily_report', False)
-        storage.save_data()
+        with storage.conn.cursor() as cur:
+            cur.execute("UPDATE users SET daily_report = NOT daily_report WHERE user_id = %s", (user_id,))
+            storage.save_data()
+        storage.load_data()
         await start(update, context)
 
     elif query.data == 'developer':
@@ -395,8 +444,10 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     elif query.data.startswith('lang_'):
         new_lang = query.data.split('_')[1]
-        storage.users[user_id]['lang'] = new_lang
-        storage.save_data()
+        with storage.conn.cursor() as cur:
+            cur.execute("UPDATE users SET lang = %s WHERE user_id = %s", (new_lang, user_id))
+            storage.save_data()
+        storage.load_data()
         await start(update, context)
 
 # Handle price input for alerts and search
@@ -412,20 +463,19 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             if current_price is None:
                 raise ValueError("Could not fetch current price")
             
-            if user_id not in storage.alerts:
-                storage.alerts[user_id] = []
-            storage.alerts[user_id].append({
-                'coin': coin,
-                'price': target_price,
-                'original_price': current_price
-            })
-            storage.save_data()
+            with storage.conn.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO alerts (user_id, coin, price, original_price)
+                    VALUES (%s, %s, %s, %s)
+                """, (user_id, coin, target_price, current_price))
+                storage.save_data()
             
             coin_name = CURRENCIES[coin] if lang == 'fa' else coin.capitalize()
             await update.message.reply_text(
                 LANGUAGES[lang]['alert_set'].format(coin=coin_name, price=target_price)
             )
             del context.user_data['alert_coin']
+            storage.load_data()
         except ValueError:
             await update.message.reply_text("Please enter a valid number" if lang == 'en' else "لطفاً یک عدد معتبر وارد کنید")
 
@@ -463,7 +513,10 @@ def main():
     application.add_handler(CallbackQueryHandler(button))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
-    application.run_polling()
+    try:
+        application.run_polling()
+    finally:
+        storage.close()
 
 if __name__ == '__main__':
     main()
