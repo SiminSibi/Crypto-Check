@@ -118,7 +118,7 @@ LANGUAGES = {
         'chart_link': "مشاهده نمودار {coin}: {url}",
         'daily_on': "روشن",
         'daily_off': "خاموش",
-        'daily_report_text': "📅 گزارش روزانه کریپتو:",
+        'daily_report_text': "📅 گزارش روزانه کریپto:",
         'search_prompt': "نام ارز را وارد کنید (فارسی یا انگلیسی):",
         'search_result': "پیدا شد: {coin}",
         'search_no_result': "ارزی پیدا نشد!",
@@ -233,10 +233,12 @@ async def daily_report(context: ContextTypes.DEFAULT_TYPE):
 # Start command
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = str(update.effective_user.id)
-    last_name = update.effective_user.last_name or "Unknown"  # Get last name from profile
+    first_name = update.effective_user.first_name or "Unknown"  # Get first name
+    last_name = update.effective_user.last_name or "Unknown"   # Get last name
     if user_id not in storage.users:
-        storage.users[user_id] = {'lang': 'en', 'daily_report': False, 'last_name': last_name}
-    elif 'last_name' not in storage.users[user_id]:  # Update last_name if not present
+        storage.users[user_id] = {'lang': 'en', 'daily_report': False, 'first_name': first_name, 'last_name': last_name}
+    elif 'first_name' not in storage.users[user_id] or 'last_name' not in storage.users[user_id]:
+        storage.users[user_id]['first_name'] = first_name
         storage.users[user_id]['last_name'] = last_name
     lang = storage.users[user_id]['lang']
     daily_status = LANGUAGES[lang]['daily_on'] if storage.users[user_id]['daily_report'] else LANGUAGES[lang]['daily_off']
@@ -378,12 +380,13 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['search_mode'] = True
 
     elif query.data == 'my_data':
+        first_name = storage.users[user_id]['first_name']
         last_name = storage.users[user_id]['last_name']
         daily_status = LANGUAGES[lang]['daily_on'] if storage.users[user_id]['daily_report'] else LANGUAGES[lang]['daily_off']
         alerts = storage.alerts.get(user_id, [])
         alerts_text = "\n".join([f"{CURRENCIES[a['coin']] if lang == 'fa' else a['coin'].capitalize()}: ${a['price']}" for a in alerts]) if alerts else LANGUAGES[lang]['alerts_empty']
         data_text = (
-            f"{LANGUAGES[lang]['my_data_title'].format(last_name=last_name)}\n"
+            f"{LANGUAGES[lang]['my_data_title'].format(last_name=f'{first_name} {last_name}')}\n"
             f"{LANGUAGES[lang]['my_data_lang'].format(lang='English' if lang == 'en' else 'فارسی')}\n"
             f"{LANGUAGES[lang]['my_data_report'].format(status=daily_status)}\n"
             f"{LANGUAGES[lang]['my_data_alerts'].format(alerts=alerts_text)}"
