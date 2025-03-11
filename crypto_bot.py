@@ -30,7 +30,7 @@ CURRENCIES = {
     'thorchain': 'تورچین (RUNE)', 'lido-dao': 'لیدو دائو (LDO)', 'render-token': 'رندر (RNDR)', 'immutable-x': 'ایمیوتبل ایکس (IMX)',
     'celestia': 'سلستیا (TIA)', 'sui': 'سوی (SUI)', 'bittensor': 'بیت‌تنسور (TAO)', 'kaspa': 'کاسپا (KAS)',
     'pepe': 'پپه (PEPE)', 'dydx': 'دی‌وای‌دی‌ایکس (DYDX)', 'worldcoin-wld': 'ورلدکوین (WLD)', 'cronos': 'کرونوس (CRO)',
-    'kava': 'کاوا (KAVA)', 'flow': 'فلو (FLOW)', 'gala': 'گالا (GALA)', 'eos865': 'ایاس (EOS)',
+    'kava': 'کاوا (KAVA)', 'flow': 'فلو (FLOW)', 'gala': 'گالا (GALA)', 'eos': 'ایاس (EOS)',
     'tezos': 'تزوس (XTZ)', 'neo': 'نئو (NEO)', 'iota': 'آیوتا (IOTA)', 'elrond-erd-2': 'الروند (EGLD)',
     'chiliz': 'چلیز (CHZ)', 'oasis-network': 'اوئیسیس (ROSE)', 'mina-protocol': 'مینا (MINA)', 'klaytn': 'کلایتن (KLAY)',
     'terra-luna': 'ترا لونا (LUNA)', 'axie-infinity': 'اکسی اینفینیتی (AXS)', 'decentraland': 'دیسنترالند (MANA)', 'sand': 'سندباکس (SAND)',
@@ -50,7 +50,7 @@ CURRENCIES = {
 LANGUAGES = {
     'en': {
         'welcome': "Welcome to Crypto Bot!\nChoose an option:",
-        'price': "Price",
+        'price': "Currencies",  # تغییر از Price به Currencies
         'set_alert': "Set Alert",
         'alerts_list': "View Alerts",
         'language': "Change Language",
@@ -74,6 +74,8 @@ LANGUAGES = {
         'daily_on': "ON",
         'daily_off': "OFF",
         'daily_report_text': "📅 Daily Crypto Report:",
+        'daily_report_enabled': "Daily report enabled for you. Every day at 8:00 AM, a report like this will be sent:\nBitcoin: $65000\nEthereum: $2500\n...",
+        'daily_report_disabled': "Daily report disabled.",
         'search_prompt': "Enter coin name (English or Persian):",
         'search_result': "Found: {coin}",
         'search_no_result': "No coin found!",
@@ -84,19 +86,16 @@ LANGUAGES = {
         'my_data_report': "Daily Report: {status}",
         'my_data_alerts': "Alerts:\n{alerts}",
         'developer_info': (
-            "👩‍💻 Developer Information:\n"
-            "Name: Sara Rad\n"
-            "Telegram ID: @SaraRad\n"
-            "Project Goal: Build a crypto tracking bot for educational purposes\n"
-            "University: Al-Zahra University, Kerman\n"
-            "Supervisor: Dr. Ali Mohammadi\n"
-            "Student ID: 140123456\n"
-            "Date: Spring 2024"
+            "Developer: Fatemeh Ziaei\n"
+            "Student ID: 02121112705031\n"
+            "Supervisor: Eng. Faezeh Mokhtar Abadi\n"
+            "University: Al-Zahra National Skills University, Kerman\n"
+            "Project Goal: Build a crypto tracking bot for educational purposes"
         )
     },
     'fa': {
         'welcome': "به ربات کریپتو خوش آمدید!\nیک گزینه را انتخاب کنید:",
-        'price': "قیمت",
+        'price': "ارزها",  # تغییر از قیمت به ارزها
         'set_alert': "تنظیم هشدار",
         'alerts_list': "مشاهده هشدارها",
         'language': "تغییر زبان",
@@ -120,6 +119,8 @@ LANGUAGES = {
         'daily_on': "روشن",
         'daily_off': "خاموش",
         'daily_report_text': "📅 گزارش روزانه کریپتو:",
+        'daily_report_enabled': "گزارش روزانه برای شما فعال شد. هر روز ساعت ۸:۰۰ صبح، گزارشی به این شکل ارسال می‌شود:\nبیت‌کوین: ۶۵۰۰۰ دلار\nاتریوم: ۲۵۰۰ دلار\n...",
+        'daily_report_disabled': "گزارش روزانه غیرفعال شد.",
         'search_prompt': "نام ارز را وارد کنید (فارسی یا انگلیسی):",
         'search_result': "پیدا شد: {coin}",
         'search_no_result': "ارزی پیدا نشد!",
@@ -130,14 +131,11 @@ LANGUAGES = {
         'my_data_report': "گزارش روزانه: {status}",
         'my_data_alerts': "هشدارها:\n{alerts}",
         'developer_info': (
-            "👩‍💻 اطلاعات توسعه‌دهنده:\n"
-            "نام: سارا راد\n"
-            "آیدی تلگرام: @SaraRad\n"
-            "هدف پروژه: ساخت ربات ردیابی کریپتو برای اهداف آموزشی\n"
-            "دانشگاه: دانشگاه الزهرا، کرمان\n"
-            "استاد راهنما: دکتر علی محمدی\n"
-            "شماره دانشجویی: ۱۴۰۱۲۳۴۵۶\n"
-            "تاریخ: بهار ۱۴۰۳"
+            "توسعه‌دهنده: فاطمه ضیایی\n"
+            "شماره دانشجویی: 02121112705031\n"
+            "استاد راهنما: خانم مهندس فائزه مختارآبادی\n"
+            "دانشگاه: دانشگاه ملی مهارت الزهرا، کرمان\n"
+            "هدف پروژه: ساخت ربات ردیابی کریپتو برای اهداف آموزشی"
         )
     }
 }
@@ -202,7 +200,7 @@ def get_crypto_price(coin_id):
         response.raise_for_status()
         data = response.json()
         price = data[coin_id]['usd']
-        change_24h = round(data[coin_id]['usd_24h_change'], 2)
+        change_24h = data[coin_id]['usd_24h_change']
         logger.info(f"Fetched price for {coin_id}: ${price}")
         return price, change_24h
     except Exception as e:
@@ -315,13 +313,12 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     items_per_page = 10
     total_pages = (len(coins) + items_per_page - 1) // items_per_page
 
-    # Split query.data and handle both cases (pagination and coin selection)
     data_parts = query.data.split('_')
     action = data_parts[0]
 
     if action in ('price', 'alert', 'chart', 'convert_to_irr') and len(data_parts) == 2:
         try:
-            page = int(data_parts[1])  # Pagination case (e.g., price_0)
+            page = int(data_parts[1])  # Pagination case
             start_idx = page * items_per_page
             end_idx = min(start_idx + items_per_page, len(coins))
             keyboard = []
@@ -348,15 +345,16 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 LANGUAGES[lang]['select_coin'].format(page=page+1, total_pages=total_pages),
                 reply_markup=InlineKeyboardMarkup(keyboard)
             )
-        except ValueError:  # Coin selection case (e.g., price_near)
+        except ValueError:  # Coin selection case
             coin = data_parts[1]
             if action == 'price':
                 price, change = get_crypto_price(coin)
-                if price:
+                if price is not None:
                     coin_name = CURRENCIES[coin] if lang == 'fa' else coin.capitalize()
+                    change_str = f"{change:+.2f}"  # نمایش علامت + یا - قبل از عدد
                     await query.edit_message_text(
                         f"{LANGUAGES[lang]['current_price'].format(coin=coin_name, price=price)}\n"
-                        f"{LANGUAGES[lang]['change_24h'].format(change=change)}"
+                        f"{LANGUAGES[lang]['change_24h'].format(change=change_str)}"
                     )
             elif action == 'alert':
                 context.user_data['alert_coin'] = coin
@@ -370,13 +368,14 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 )
             elif action == 'convert_to_irr':
                 price, change = get_crypto_price(coin)
-                if price:
+                if price is not None:
                     price_irr = int(price * USD_TO_IRR)
                     coin_name = CURRENCIES[coin] if lang == 'fa' else coin.capitalize()
+                    change_str = f"{change:+.2f}"  # نمایش علامت + یا - قبل از عدد
                     await query.edit_message_text(
                         f"{LANGUAGES[lang]['current_price'].format(coin=coin_name, price=price)}\n"
                         f"{LANGUAGES[lang]['price_in_irr'].format(coin=coin_name, price_irr=price_irr)}\n"
-                        f"{LANGUAGES[lang]['change_24h'].format(change=change)}"
+                        f"{LANGUAGES[lang]['change_24h'].format(change=change_str)}"
                     )
 
     elif query.data == 'alerts_list':
@@ -384,11 +383,23 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not alerts:
             await query.edit_message_text(LANGUAGES[lang]['alerts_empty'])
         else:
-            alert_list = [LANGUAGES[lang]['alerts_title']]
+            keyboard = []
             for i, alert in enumerate(alerts):
                 coin_name = CURRENCIES[alert['coin']] if lang == 'fa' else alert['coin'].capitalize()
-                alert_list.append(f"{coin_name}: ${alert['price']}  [{LANGUAGES[lang]['delete_alert']}](callback_data='delete_alert_{i}')")
-            await query.edit_message_text("\n".join(alert_list), parse_mode='Markdown')
+                keyboard.append([
+                    InlineKeyboardButton(
+                        f"{coin_name}: ${alert['price']}",
+                        callback_data='noop'  # دکمه فقط نمایشه
+                    ),
+                    InlineKeyboardButton(
+                        LANGUAGES[lang]['delete_alert'],
+                        callback_data=f"delete_alert_{i}"
+                    )
+                ])
+            await query.edit_message_text(
+                LANGUAGES[lang]['alerts_title'],
+                reply_markup=InlineKeyboardMarkup(keyboard)
+            )
 
     elif query.data.startswith('delete_alert_'):
         alert_index = int(query.data.split('_')[2])
@@ -401,7 +412,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     cur.execute("DELETE FROM alerts WHERE id = %s", (alert_ids[alert_index],))
                     storage.save_data()
                     storage.load_data()
-        await button(update, context)
+        await button(update, context)  # رفرش لیست هشدارها
 
     elif query.data == 'language':
         keyboard = [
@@ -413,47 +424,14 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=InlineKeyboardMarkup(keyboard)
         )
 
-    elif query.data.startswith('price_') and len(query.data.split('_')) == 2:
-        coin = query.data.split('_')[1]
-        price, change = get_crypto_price(coin)
-        if price:
-            coin_name = CURRENCIES[coin] if lang == 'fa' else coin.capitalize()
-            await query.edit_message_text(
-                f"{LANGUAGES[lang]['current_price'].format(coin=coin_name, price=price)}\n"
-                f"{LANGUAGES[lang]['change_24h'].format(change=change)}"
-            )
-
-    elif query.data.startswith('alert_') and len(query.data.split('_')) == 2:
-        coin = query.data.split('_')[1]
-        context.user_data['alert_coin'] = coin
-        coin_name = CURRENCIES[coin] if lang == 'fa' else coin.capitalize()
-        await query.edit_message_text(LANGUAGES[lang]['enter_price'].format(coin=coin_name))
-
-    elif query.data.startswith('chart_') and len(query.data.split('_')) == 2:
-        coin = query.data.split('_')[1]
-        coin_name = CURRENCIES[coin] if lang == 'fa' else coin.capitalize()
-        chart_url = f"https://www.tradingview.com/chart/?symbol={coin.upper()}USD"
-        await query.edit_message_text(
-            LANGUAGES[lang]['chart_link'].format(coin=coin_name, url=chart_url)
-        )
-
-    elif query.data.startswith('convert_to_irr_') and len(query.data.split('_')) == 2:
-        coin = query.data.split('_')[1]
-        price, change = get_crypto_price(coin)
-        if price:
-            price_irr = int(price * USD_TO_IRR)
-            coin_name = CURRENCIES[coin] if lang == 'fa' else coin.capitalize()
-            await query.edit_message_text(
-                f"{LANGUAGES[lang]['current_price'].format(coin=coin_name, price=price)}\n"
-                f"{LANGUAGES[lang]['price_in_irr'].format(coin=coin_name, price_irr=price_irr)}\n"
-                f"{LANGUAGES[lang]['change_24h'].format(change=change)}"
-            )
-
     elif query.data == 'toggle_daily':
         with storage.conn.cursor() as cur:
-            cur.execute("UPDATE users SET daily_report = NOT daily_report WHERE user_id = %s", (user_id,))
+            cur.execute("UPDATE users SET daily_report = NOT daily_report WHERE user_id = %s RETURNING daily_report", (user_id,))
+            new_status = cur.fetchone()['daily_report']
             storage.save_data()
         storage.load_data()
+        message = LANGUAGES[lang]['daily_report_enabled'] if new_status else LANGUAGES[lang]['daily_report_disabled']
+        await query.edit_message_text(message)
         await start(update, context)
 
     elif query.data == 'developer':
