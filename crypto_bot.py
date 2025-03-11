@@ -14,10 +14,10 @@ logger = logging.getLogger(__name__)
 
 # Configuration
 COINGECKO_API = "https://api.coingecko.com/api/v3"
-CHECK_INTERVAL = 180  # Check every 3 minutes
+CHECK_INTERVAL = 60  # Check every 1 minute (تغییر از 180 به 60)
 USD_TO_IRR = 930000  # 930,000 IRR per USD
 
-# 100 popular cryptocurrencies
+# 100 popular cryptocurrencies (بدون تغییر)
 CURRENCIES = {
     'bitcoin': 'بیت‌کوین (BTC)', 'ethereum': 'اتریوم (ETH)', 'tether': 'تتر (USDT)', 'binancecoin': 'بایننس کوین (BNB)',
     'solana': 'سولانا (SOL)', 'ripple': 'ریپل (XRP)', 'cardano': 'کاردانو (ADA)', 'dogecoin': 'دوج‌کوین (DOGE)',
@@ -50,7 +50,7 @@ CURRENCIES = {
 LANGUAGES = {
     'en': {
         'welcome': "Welcome to Crypto Bot!\nChoose an option:",
-        'price': "Currencies",  # تغییر از Price به Currencies
+        'price': "Currencies",
         'set_alert': "Set Alert",
         'alerts_list': "View Alerts",
         'language': "Change Language",
@@ -70,11 +70,13 @@ LANGUAGES = {
         'alerts_empty': "You have no active alerts.",
         'alerts_title': "Your Active Alerts:",
         'delete_alert': "Delete",
+        'delete_menu': "Which alert do you want to delete?",
+        'alert_deleted': "Alert deleted!",
         'chart_link': "View {coin} chart: {url}",
         'daily_on': "ON",
         'daily_off': "OFF",
         'daily_report_text': "📅 Daily Crypto Report:",
-        'daily_report_enabled': "Daily report enabled for you. Every day at 8:00 AM, a report like this will be sent:\nBitcoin: $65000\nEthereum: $2500\n...",
+        'daily_report_enabled': "Daily report enabled for you. Every day at 8:00 AM, a report will be sent with the top 10 crypto prices.",
         'daily_report_disabled': "Daily report disabled.",
         'search_prompt': "Enter coin name (English or Persian):",
         'search_result': "Found: {coin}",
@@ -86,16 +88,29 @@ LANGUAGES = {
         'my_data_report': "Daily Report: {status}",
         'my_data_alerts': "Alerts:\n{alerts}",
         'developer_info': (
-            "Developer: Fatemeh Ziaei\n"
-            "Student ID: 02121112705031\n"
-            "Supervisor: Eng. Faezeh Mokhtar Abadi\n"
-            "University: Al-Zahra National Skills University, Kerman\n"
+            "Developer: Fatemeh Ziaei\n\n"
+            "Student ID: 02121112705031\n\n"
+            "Supervisor: Eng. Faezeh Mokhtar Abadi\n\n"
+            "University: Al-Zahra National Skills University, Kerman\n\n"
             "Project Goal: Build a crypto tracking bot for educational purposes"
+        ),
+        'help': (
+            "Crypto Bot Help:\n"
+            "- /start: Start the bot and see the main menu\n"
+            "- Currencies: View current prices of cryptocurrencies\n"
+            "- Set Alert: Set a price alert for a coin\n"
+            "- View Alerts: See and manage your alerts\n"
+            "- Chart: Get a chart link for a coin\n"
+            "- Daily Report: Toggle daily price reports\n"
+            "- Search Coin: Search for a specific coin\n"
+            "- My Data: View your saved data\n"
+            "- Change Language: Switch between English and Persian\n"
+            "- About Developer: Learn about the developer"
         )
     },
     'fa': {
         'welcome': "به ربات کریپتو خوش آمدید!\nیک گزینه را انتخاب کنید:",
-        'price': "ارزها",  # تغییر از قیمت به ارزها
+        'price': "ارزها",
         'set_alert': "تنظیم هشدار",
         'alerts_list': "مشاهده هشدارها",
         'language': "تغییر زبان",
@@ -115,12 +130,14 @@ LANGUAGES = {
         'alerts_empty': "شما هیچ هشداری فعال ندارید.",
         'alerts_title': "هشدارهای فعال شما:",
         'delete_alert': "حذف",
+        'delete_menu': "کدام هشدار را می‌خواهید حذف کنید؟",
+        'alert_deleted': "هشدار حذف شد!",
         'chart_link': "مشاهده نمودار {coin}: {url}",
         'daily_on': "روشن",
         'daily_off': "خاموش",
         'daily_report_text': "📅 گزارش روزانه کریپتو:",
-        'daily_report_enabled': "گزارش روزانه برای شما فعال شد. هر روز ساعت ۸:۰۰ صبح، گزارشی به این شکل ارسال می‌شود:\nبیت‌کوین: ۶۵۰۰۰ دلار\nاتریوم: ۲۵۰۰ دلار\n...",
-        'daily_report_disabled': "گزارش روزانه غیرفعال شد.",
+        'daily_report_enabled': "گزارش روزانه برای شما فعال شد. هر روز ساعت ۸:۰۰ صبح، گزارشی از قیمت ۱۰ ارز برتر ارسال می‌شود.",
+        'daily_report_disabled': "گزارش روزانه خاموش شد.",
         'search_prompt': "نام ارز را وارد کنید (فارسی یا انگلیسی):",
         'search_result': "پیدا شد: {coin}",
         'search_no_result': "ارزی پیدا نشد!",
@@ -131,16 +148,29 @@ LANGUAGES = {
         'my_data_report': "گزارش روزانه: {status}",
         'my_data_alerts': "هشدارها:\n{alerts}",
         'developer_info': (
-            "توسعه‌دهنده: فاطمه ضیایی\n"
-            "شماره دانشجویی: 02121112705031\n"
-            "استاد راهنما: خانم مهندس فائزه مختارآبادی\n"
-            "دانشگاه: دانشگاه ملی مهارت الزهرا، کرمان\n"
+            "توسعه‌دهنده: فاطمه ضیایی\n\n"
+            "شماره دانشجویی: 02121112705031\n\n"
+            "استاد راهنما: خانم مهندس فائزه مختارآبادی\n\n"
+            "دانشگاه: دانشگاه ملی مهارت الزهرا، کرمان\n\n"
             "هدف پروژه: ساخت ربات ردیابی کریپتو برای اهداف آموزشی"
+        ),
+        'help': (
+            "راهنمایی ربات کریپتو:\n"
+            "- /start: شروع ربات و نمایش منوی اصلی\n"
+            "- ارزها: مشاهده قیمت فعلی ارزهای دیجیتال\n"
+            "- تنظیم هشدار: تنظیم هشدار قیمت برای یک ارز\n"
+            "- مشاهده هشدارها: دیدن و مدیریت هشدارهای شما\n"
+            "- نمودار: دریافت لینک نمودار یک ارز\n"
+            "- گزارش روزانه: روشن/خاموش کردن گزارش روزانه قیمت‌ها\n"
+            "- جستجوی ارز: جستجو برای یک ارز خاص\n"
+            "- داده‌های من: مشاهده داده‌های ذخیره‌شده شما\n"
+            "- تغییر زبان: تغییر بین فارسی و انگلیسی\n"
+            "- معرفی توسعه‌دهنده: اطلاعات درباره توسعه‌دهنده"
         )
     }
 }
 
-# Data storage with PostgreSQL
+# Data storage with PostgreSQL (بدون تغییر)
 class Storage:
     def __init__(self):
         self.conn = psycopg2.connect(os.getenv('DATABASE_URL'), cursor_factory=RealDictCursor)
@@ -192,7 +222,7 @@ class Storage:
 
 storage = Storage()
 
-# Get crypto price from CoinGecko
+# Get crypto price from CoinGecko (بدون تغییر)
 def get_crypto_price(coin_id):
     try:
         url = f"{COINGECKO_API}/simple/price?ids={coin_id}&vs_currencies=usd&include_24hr_change=true"
@@ -207,7 +237,7 @@ def get_crypto_price(coin_id):
         logger.error(f"Error fetching price for {coin_id}: {e}")
         return None, None
 
-# Check alerts
+# Check alerts (بدون تغییر)
 async def check_alerts(context: ContextTypes.DEFAULT_TYPE):
     try:
         ids = ','.join(CURRENCIES.keys())
@@ -246,7 +276,7 @@ async def check_alerts(context: ContextTypes.DEFAULT_TYPE):
         storage.save_data()
     storage.load_data()
 
-# Daily report
+# Daily report (بدون تغییر)
 async def daily_report(context: ContextTypes.DEFAULT_TYPE):
     try:
         ids = ','.join(CURRENCIES.keys())
@@ -294,14 +324,19 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton(LANGUAGES[lang]['alerts_list'], callback_data='alerts_list'),
          InlineKeyboardButton(LANGUAGES[lang]['chart'], callback_data='chart_0')],
         [InlineKeyboardButton(LANGUAGES[lang]['daily_report'].format(status=daily_status), callback_data='toggle_daily'),
-         InlineKeyboardButton(LANGUAGES[lang]['convert_to_irr'], callback_data='convert_to_irr_0')],
-        [InlineKeyboardButton(LANGUAGES[lang]['search'], callback_data='search'),
-         InlineKeyboardButton(LANGUAGES[lang]['developer'], callback_data='developer')],
+         InlineKeyboardButton(LANGUAGES[lang]['search'], callback_data='search')],
         [InlineKeyboardButton(LANGUAGES[lang]['my_data'], callback_data='my_data'),
-         InlineKeyboardButton(LANGUAGES[lang]['language'], callback_data='language')]
+         InlineKeyboardButton(LANGUAGES[lang]['language'], callback_data='language')],
+        [InlineKeyboardButton(LANGUAGES[lang]['developer'], callback_data='developer')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text(LANGUAGES[lang]['welcome'], reply_markup=reply_markup)
+
+# Help command
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = str(update.effective_user.id)
+    lang = storage.users.get(user_id, {}).get('lang', 'en')
+    await update.message.reply_text(LANGUAGES[lang]['help'])
 
 # Button handler
 async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -316,7 +351,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data_parts = query.data.split('_')
     action = data_parts[0]
 
-    if action in ('price', 'alert', 'chart', 'convert_to_irr') and len(data_parts) == 2:
+    if action in ('price', 'alert', 'chart') and len(data_parts) == 2:
         try:
             page = int(data_parts[1])  # Pagination case
             start_idx = page * items_per_page
@@ -351,10 +386,13 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 price, change = get_crypto_price(coin)
                 if price is not None:
                     coin_name = CURRENCIES[coin] if lang == 'fa' else coin.capitalize()
-                    change_str = f"{change:+.2f}"  # نمایش علامت + یا - قبل از عدد
+                    change_str = f"{change:+.2f}"
                     await query.edit_message_text(
                         f"{LANGUAGES[lang]['current_price'].format(coin=coin_name, price=price)}\n"
-                        f"{LANGUAGES[lang]['change_24h'].format(change=change_str)}"
+                        f"{LANGUAGES[lang]['change_24h'].format(change=change_str)}",
+                        reply_markup=InlineKeyboardMarkup([
+                            [InlineKeyboardButton(LANGUAGES[lang]['convert_to_irr'], callback_data=f"convert_to_irr_{coin}")]
+                        ])
                     )
             elif action == 'alert':
                 context.user_data['alert_coin'] = coin
@@ -366,19 +404,34 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 await query.edit_message_text(
                     LANGUAGES[lang]['chart_link'].format(coin=coin_name, url=chart_url)
                 )
-            elif action == 'convert_to_irr':
-                price, change = get_crypto_price(coin)
-                if price is not None:
-                    price_irr = int(price * USD_TO_IRR)
-                    coin_name = CURRENCIES[coin] if lang == 'fa' else coin.capitalize()
-                    change_str = f"{change:+.2f}"  # نمایش علامت + یا - قبل از عدد
-                    await query.edit_message_text(
-                        f"{LANGUAGES[lang]['current_price'].format(coin=coin_name, price=price)}\n"
-                        f"{LANGUAGES[lang]['price_in_irr'].format(coin=coin_name, price_irr=price_irr)}\n"
-                        f"{LANGUAGES[lang]['change_24h'].format(change=change_str)}"
-                    )
+
+    elif action == 'convert_to_irr':
+        coin = data_parts[1]
+        price, change = get_crypto_price(coin)
+        if price is not None:
+            price_irr = int(price * USD_TO_IRR)
+            coin_name = CURRENCIES[coin] if lang == 'fa' else coin.capitalize()
+            change_str = f"{change:+.2f}"
+            await query.edit_message_text(
+                f"{LANGUAGES[lang]['current_price'].format(coin=coin_name, price=price)}\n"
+                f"{LANGUAGES[lang]['price_in_irr'].format(coin=coin_name, price_irr=price_irr)}\n"
+                f"{LANGUAGES[lang]['change_24h'].format(change=change_str)}"
+            )
 
     elif query.data == 'alerts_list':
+        alerts = storage.alerts.get(user_id, [])
+        if not alerts:
+            await query.edit_message_text(LANGUAGES[lang]['alerts_empty'])
+        else:
+            alert_list = [LANGUAGES[lang]['alerts_title']]
+            for alert in alerts:
+                coin_name = CURRENCIES[alert['coin']] if lang == 'fa' else alert['coin'].capitalize()
+                alert_list.append(f"{coin_name}: ${alert['price']}")
+            alert_list.append("")  # خط خالی قبل از دکمه
+            keyboard = [[InlineKeyboardButton(LANGUAGES[lang]['delete_alert'], callback_data='delete_menu')]]
+            await query.edit_message_text("\n".join(alert_list), reply_markup=InlineKeyboardMarkup(keyboard))
+
+    elif query.data == 'delete_menu':
         alerts = storage.alerts.get(user_id, [])
         if not alerts:
             await query.edit_message_text(LANGUAGES[lang]['alerts_empty'])
@@ -386,18 +439,12 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
             keyboard = []
             for i, alert in enumerate(alerts):
                 coin_name = CURRENCIES[alert['coin']] if lang == 'fa' else alert['coin'].capitalize()
-                keyboard.append([
-                    InlineKeyboardButton(
-                        f"{coin_name}: ${alert['price']}",
-                        callback_data='noop'  # دکمه فقط نمایشه
-                    ),
-                    InlineKeyboardButton(
-                        LANGUAGES[lang]['delete_alert'],
-                        callback_data=f"delete_alert_{i}"
-                    )
-                ])
+                keyboard.append([InlineKeyboardButton(
+                    f"{coin_name}: ${alert['price']}",
+                    callback_data=f"delete_alert_{i}"
+                )])
             await query.edit_message_text(
-                LANGUAGES[lang]['alerts_title'],
+                LANGUAGES[lang]['delete_menu'],
                 reply_markup=InlineKeyboardMarkup(keyboard)
             )
 
@@ -412,7 +459,9 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     cur.execute("DELETE FROM alerts WHERE id = %s", (alert_ids[alert_index],))
                     storage.save_data()
                     storage.load_data()
-        await button(update, context)  # رفرش لیست هشدارها
+            await query.edit_message_text(LANGUAGES[lang]['alert_deleted'])
+        else:
+            await button(update, context)  # برگشت به لیست هشدارها
 
     elif query.data == 'language':
         keyboard = [
@@ -463,7 +512,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         storage.load_data()
         await start(update, context)
 
-# Handle price input for alerts and search
+# Handle price input for alerts and search (بدون تغییر)
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = str(update.effective_user.id)
     lang = storage.users[user_id]['lang']
@@ -506,8 +555,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 reply_markup=InlineKeyboardMarkup([
                     [InlineKeyboardButton(LANGUAGES[lang]['price'], callback_data=f"price_{found}"),
                      InlineKeyboardButton(LANGUAGES[lang]['set_alert'], callback_data=f"alert_{found}")],
-                    [InlineKeyboardButton(LANGUAGES[lang]['chart'], callback_data=f"chart_{found}"),
-                     InlineKeyboardButton(LANGUAGES[lang]['convert_to_irr'], callback_data=f"convert_to_irr_{found}")]
+                    [InlineKeyboardButton(LANGUAGES[lang]['chart'], callback_data=f"chart_{found}")]
                 ])
             )
         else:
@@ -523,6 +571,7 @@ def main():
     scheduler.start()
 
     application.add_handler(CommandHandler("start", start))
+    application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CallbackQueryHandler(button))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
