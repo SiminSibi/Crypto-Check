@@ -46,6 +46,109 @@ CURRENCIES = {
     'band-protocol': 'بند پروتکل (BAND)', 'cartesi': 'کارتزی (CTSI)', 'orchid-protocol': 'ارکید (OXT)', 'nkn': 'ان‌کی‌ان (NKN)'
 }
 
+COIN_SYMBOLS = {
+    'bitcoin': 'BTC',
+    'ethereum': 'ETH',
+    'tether': 'USDT',
+    'binancecoin': 'BNB',
+    'solana': 'SOL',
+    'ripple': 'XRP',
+    'cardano': 'ADA',
+    'dogecoin': 'DOGE',
+    'tron': 'TRX',
+    'litecoin': 'LTC',
+    'shiba-inu': 'SHIB',
+    'polkadot': 'DOT',
+    'chainlink': 'LINK',
+    'matic-network': 'MATIC',
+    'uniswap': 'UNI',
+    'avalanche-2': 'AVAX',
+    'stellar': 'XLM',
+    'cosmos': 'ATOM',
+    'near': 'NEAR',
+    'aptos': 'APT',
+    'filecoin': 'FIL',
+    'arbitrum': 'ARB',
+    'optimism': 'OP',
+    'hedera-hashgraph': 'HBAR',
+    'vechain': 'VET',
+    'injective-protocol': 'INJ',
+    'algorand': 'ALGO',
+    'quant-network': 'QNT',
+    'maker': 'MKR',
+    'aave': 'AAVE',
+    'the-graph': 'GRT',
+    'fantom': 'FTM',
+    'thorchain': 'RUNE',
+    'lido-dao': 'LDO',
+    'render-token': 'RNDR',
+    'immutable-x': 'IMX',
+    'celestia': 'TIA',
+    'sui': 'SUI',
+    'bittensor': 'TAO',
+    'kaspa': 'KAS',
+    'pepe': 'PEPE',
+    'dydx': 'DYDX',
+    'worldcoin-wld': 'WLD',
+    'cronos': 'CRO',
+    'kava': 'KAVA',
+    'flow': 'FLOW',
+    'gala': 'GALA',
+    'eos': 'EOS',
+    'tezos': 'XTZ',
+    'neo': 'NEO',
+    'iota': 'IOTA',
+    'elrond-erd-2': 'EGLD',
+    'chiliz': 'CHZ',
+    'oasis-network': 'ROSE',
+    'mina-protocol': 'MINA',
+    'klaytn': 'KLAY',
+    'terra-luna': 'LUNA',
+    'axie-infinity': 'AXS',
+    'decentraland': 'MANA',
+    'sand': 'SAND',
+    'curve-dao-token': 'CRV',
+    'compound-governance-token': 'COMP',
+    'synthetix-network-token': 'SNX',
+    '1inch': '1INCH',
+    'pancakeswap-token': 'CAKE',
+    'trust-wallet-token': 'TWT',
+    'rocket-pool': 'RPL',
+    'gnosis': 'GNO',
+    'basic-attention-token': 'BAT',
+    'zcash': 'ZEC',
+    'dash': 'DASH',
+    'nem': 'XEM',
+    'waves': 'WAVES',
+    'siacoin': 'SC',
+    'ontology': 'ONT',
+    'qtum': 'QTUM',
+    'icon': 'ICX',
+    'ravencoin': 'RVN',
+    'zilliqa': 'ZIL',
+    '0x': 'ZRX',
+    'audius': 'AUDIO',
+    'ankr': 'ANKR',
+    'balancer': 'BAL',
+    'yearn-finance': 'YFI',
+    'uma': 'UMA',
+    'harmony': 'ONE',
+    'wax': 'WAXP',
+    'hive': 'HIVE',
+    'steem': 'STEEM',
+    'digibyte': 'DGB',
+    'nano': 'XNO',
+    'storj': 'STORJ',
+    'livepeer': 'LPT',
+    'skale': 'SKL',
+    'numeraire': 'NMR',
+    'api3': 'API3',
+    'band-protocol': 'BAND',
+    'cartesi': 'CTSI',
+    'orchid-protocol': 'OXT',
+    'nkn': 'NKN'
+}
+
 # دیکشنری زبان‌ها
 LANGUAGES = {
     'en': {
@@ -415,30 +518,42 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         [InlineKeyboardButton(LANGUAGES[lang]['back_to_menu'], callback_data='back_to_menu')]
                     ])
                 )
-            elif action == 'chart':
+            elif action == 'chart':         
                 coin_name = CURRENCIES[coin] if lang == 'fa' else coin.capitalize()
-                # اصلاح لینک نمودار برای سازگاری با TradingView
-                symbol = coin.upper() if coin == 'bitcoin' else f"BINANCE:{coin.upper()}USDT"  # استفاده از جفت USDT برای اکثر ارزها
-                chart_url = f"https://www.tradingview.com/chart/?symbol={symbol}"
-                await query.edit_message_text(
-                    LANGUAGES[lang]['chart_link'].format(coin=coin_name, url=chart_url),
+                if coin in COIN_SYMBOLS:
+                    if coin == 'bitcoin':
+                        symbol = COIN_SYMBOLS[coin]  # فقط BTC
+                    elif coin == 'tether':
+                        symbol = COIN_SYMBOLS[coin]  # فقط USDT
+                    else:
+                        symbol = f"BINANCE:{COIN_SYMBOLS[coin]}USDT"  # جفت‌ارز بایننس
+                    chart_url = f"https://www.tradingview.com/chart/?symbol={symbol}"
+                    await query.edit_message_text(
+                        LANGUAGES[lang]['chart_link'].format(coin=coin_name, url=chart_url),
+                        reply_markup=InlineKeyboardMarkup([
+                            [InlineKeyboardButton(LANGUAGES[lang]['back_to_menu'], callback_data='back_to_menu')]
+                        ])
+                    )
+                else:
+                    await query.edit_message_text(
+                        "نمودار برای این ارز در دسترس نیست" if lang == 'fa' else "Chart not available for this coin",
+                        reply_markup=InlineKeyboardMarkup([
+                            [InlineKeyboardButton(LANGUAGES[lang]['back_to_menu'], callback_data='back_to_menu')]
+                        ])
+                    )
+
+            elif action == 'convert_to_irr':
+                coin = data_parts[1]
+                price = float(data_parts[2])
+                price_irr = price * USD_TO_IRR
+                coin_name = CURRENCIES[coin] if lang == 'fa' else coin.capitalize()
+                price_irr_str = "{:,.0f}".format(price_irr)
+                await query.message.reply_text(
+                    LANGUAGES[lang]['convert_message'].format(coin=coin_name, price_irr=price_irr_str),
                     reply_markup=InlineKeyboardMarkup([
                         [InlineKeyboardButton(LANGUAGES[lang]['back_to_menu'], callback_data='back_to_menu')]
                     ])
                 )
-
-    elif action == 'convert_to_irr':
-        coin = data_parts[1]
-        price = float(data_parts[2])
-        price_irr = price * USD_TO_IRR
-        coin_name = CURRENCIES[coin] if lang == 'fa' else coin.capitalize()
-        price_irr_str = "{:,.0f}".format(price_irr)
-        await query.message.reply_text(
-            LANGUAGES[lang]['convert_message'].format(coin=coin_name, price_irr=price_irr_str),
-            reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton(LANGUAGES[lang]['back_to_menu'], callback_data='back_to_menu')]
-            ])
-        )
 
     elif query.data == 'alerts_list':
         alerts = storage.alerts.get(user_id, [])
