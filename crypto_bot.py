@@ -643,7 +643,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # تابع اصلی برنامه
 def main():
-    application = Application.builder().token('8003905325:AAGaLlv41FUe9RgHjFmeNDLrxSQAcWO7KXE').build()
+    application = Application.builder().token('8003905325:AAHsnqAtfDjSYFZdfPCfDVZ7LnEnEbRR9_g').build()
     
     scheduler = AsyncIOScheduler()
     scheduler.add_job(check_alerts, 'interval', seconds=CHECK_INTERVAL, args=[application])
