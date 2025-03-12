@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 # Configuration
 COINGECKO_API = "https://api.coingecko.com/api/v3"
-CHECK_INTERVAL = 60  # Check every 1 minute (تغییر از 180 به 60)
+CHECK_INTERVAL = 60  # Check every 1 minute
 USD_TO_IRR = 930000  # 930,000 IRR per USD
 
 # 100 popular cryptocurrencies (بدون تغییر)
@@ -49,7 +49,7 @@ CURRENCIES = {
 # Language dictionaries
 LANGUAGES = {
     'en': {
-        'welcome': "Welcome to Crypto Bot!\nChoose an option:",
+        "Welcome to Crypto Bot!\nChoose an option:",
         'price': "Currencies",
         'set_alert': "Set Alert",
         'alerts_list': "View Alerts",
@@ -76,7 +76,7 @@ LANGUAGES = {
         'daily_on': "ON",
         'daily_off': "OFF",
         'daily_report_text': "📅 Daily Crypto Report:",
-        'daily_report_enabled': "Daily report enabled for you. Every day at 8:00 AM, a report will be sent with the top 10 crypto prices.",
+        'daily_report_enabled': "Daily report enabled for you. Every day at 6:00 AM, a report will be sent with the top 10 crypto prices.",
         'daily_report_disabled': "Daily report disabled.",
         'search_prompt': "Enter coin name (English or Persian):",
         'search_result': "Found: {coin}",
@@ -90,9 +90,10 @@ LANGUAGES = {
         'developer_info': (
             "Developer: Fatemeh Ziaei\n\n"
             "Student ID: 02121112705031\n\n"
-            "Supervisor: Eng. Faezeh Mokhtar Abadi\n\n"
-            "University: Al-Zahra National Skills University, Kerman\n\n"
-            "Project Goal: Build a crypto tracking bot for educational purposes"
+            "Supervisor: Dr. Faezeh Mokhtar Abadi\n\n"
+            "University: Al-Zahra National Skills University, Kerman, Iran\n\n"
+            "Project Goal: Build a crypto tracking bot\n\n\n"
+            "** Bachelor's Thesis **"
         ),
         'help': (
             "Crypto Bot Help:\n"
@@ -136,7 +137,7 @@ LANGUAGES = {
         'daily_on': "روشن",
         'daily_off': "خاموش",
         'daily_report_text': "📅 گزارش روزانه کریپتو:",
-        'daily_report_enabled': "گزارش روزانه برای شما فعال شد. هر روز ساعت ۸:۰۰ صبح، گزارشی از قیمت ۱۰ ارز برتر ارسال می‌شود.",
+        'daily_report_enabled': "گزارش روزانه برای شما فعال شد. هر روز ساعت ۶:۰۰ صبح، گزارشی از قیمت ۱۰ ارز برتر ارسال می‌شود.",
         'daily_report_disabled': "گزارش روزانه خاموش شد.",
         'search_prompt': "نام ارز را وارد کنید (فارسی یا انگلیسی):",
         'search_result': "پیدا شد: {coin}",
@@ -150,9 +151,10 @@ LANGUAGES = {
         'developer_info': (
             "توسعه‌دهنده: فاطمه ضیایی\n\n"
             "شماره دانشجویی: 02121112705031\n\n"
-            "استاد راهنما: خانم مهندس فائزه مختارآبادی\n\n"
+            "استاد راهنما: خانم دکتر فائزه مختارآبادی\n\n"
             "دانشگاه: دانشگاه ملی مهارت الزهرا، کرمان\n\n"
-            "هدف پروژه: ساخت ربات ردیابی کریپتو برای اهداف آموزشی"
+            "هدف پروژه: ساخت ربات ردیابی کریپتو\n\n\n"
+            "** پروژه کارشناسی **"
         ),
         'help': (
             "راهنمایی ربات کریپتو:\n"
@@ -394,6 +396,8 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
                             [InlineKeyboardButton(LANGUAGES[lang]['convert_to_irr'], callback_data=f"convert_to_irr_{coin}")]
                         ])
                     )
+                else:
+                    await query.edit_message_text("Could not fetch price." if lang == 'en' else "نمی‌توان قیمت را دریافت کرد.")
             elif action == 'alert':
                 context.user_data['alert_coin'] = coin
                 coin_name = CURRENCIES[coin] if lang == 'fa' else coin.capitalize()
@@ -409,14 +413,16 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         coin = data_parts[1]
         price, change = get_crypto_price(coin)
         if price is not None:
-            price_irr = int(price * USD_TO_IRR)
+            price_irr = price * USD_TO_IRR  # تبدیل مستقیم دلار به ریال
             coin_name = CURRENCIES[coin] if lang == 'fa' else coin.capitalize()
             change_str = f"{change:+.2f}"
             await query.edit_message_text(
                 f"{LANGUAGES[lang]['current_price'].format(coin=coin_name, price=price)}\n"
-                f"{LANGUAGES[lang]['price_in_irr'].format(coin=coin_name, price_irr=price_irr)}\n"
+                f"{LANGUAGES[lang]['price_in_irr'].format(coin=coin_name, price_irr=f'{price_irr:,.0f}')}\n"
                 f"{LANGUAGES[lang]['change_24h'].format(change=change_str)}"
             )
+        else:
+            await query.edit_message_text("Could not fetch price." if lang == 'en' else "نمی‌توان قیمت را دریافت کرد.")
 
     elif query.data == 'alerts_list':
         alerts = storage.alerts.get(user_id, [])
@@ -567,7 +573,7 @@ def main():
     
     scheduler = AsyncIOScheduler()
     scheduler.add_job(check_alerts, 'interval', seconds=CHECK_INTERVAL, args=[application])
-    scheduler.add_job(daily_report, 'cron', hour=8, args=[application])
+    scheduler.add_job(daily_report, 'cron', hour=2, minute=30, args=[application])
     scheduler.start()
 
     application.add_handler(CommandHandler("start", start))
