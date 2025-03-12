@@ -428,20 +428,23 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 )
 
     elif action == 'convert_to_irr':
-        coin = data_parts[1]
-        price, change = get_crypto_price(coin)
-        if price is not None:
-            price_irr = price * USD_TO_IRR  # تبدیل مستقیم دلار به ریال
-            coin_name = CURRENCIES[coin] if lang == 'fa' else coin.capitalize()
-            change_str = f"{change:+.2f}"
-            await query.edit_message_text(
-                f"{LANGUAGES[lang]['current_price'].format(coin=coin_name, price=price)}\n"
-                f"{LANGUAGES[lang]['price_in_irr'].format(coin=coin_name, price_irr=f'{price_irr:,.0f}')}\n"
-                f"{LANGUAGES[lang]['change_24h'].format(change=change_str)}"
-            )
-        else:
-            await query.edit_message_text("Could not fetch price." if lang == 'en' else "نمی‌توان قیمت را دریافت کرد.")
+    coin = data_parts[1]
+    price, change = get_crypto_price(coin)
+    if price is not None:
+        price_irr = price * USD_TO_IRR  # تبدیل دلار به ریال
+        logger.info(f"Converted {coin} price to IRR: {price_irr}")  # لاگ برای دیباگ
+        coin_name = CURRENCIES[coin] if lang == 'fa' else coin.capitalize()
+        change_str = f"{change:+.2f}"
+        price_irr_str = "{:,.0f}".format(price_irr)  # فرمت‌دهی ساده‌تر
+        await query.edit_message_text(
+            f"{LANGUAGES[lang]['current_price'].format(coin=coin_name, price=price)}\n"
+            f"{LANGUAGES[lang]['price_in_irr'].format(coin=coin_name, price_irr=price_irr_str)}\n"
+            f"{LANGUAGES[lang]['change_24h'].format(change=change_str)}"
+        )
+    else:
+        await query.edit_message_text("Could not fetch price." if lang == 'en' else "نمی‌توان قیمت را دریافت کرد.")
 
+    
     elif query.data == 'alerts_list':
         alerts = storage.alerts.get(user_id, [])
         if not alerts:
