@@ -8,16 +8,16 @@ from datetime import datetime
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
-# Logging configuration
+# تنظیمات لاگینگ
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Configuration
+# تنظیمات ثابت
 COINGECKO_API = "https://api.coingecko.com/api/v3"
-CHECK_INTERVAL = 60  # Check every 1 minute
-USD_TO_IRR = 930000  # 930,000 IRR per USD
+CHECK_INTERVAL = 60  # چک کردن هر 1 دقیقه
+USD_TO_IRR = 930000  # نرخ تبدیل دلار به ریال
 
-# 100 popular cryptocurrencies
+# لیست 100 ارز دیجیتال محبوب
 CURRENCIES = {
     'bitcoin': 'بیت‌کوین (BTC)', 'ethereum': 'اتریوم (ETH)', 'tether': 'تتر (USDT)', 'binancecoin': 'بایننس کوین (BNB)',
     'solana': 'سولانا (SOL)', 'ripple': 'ریپل (XRP)', 'cardano': 'کاردانو (ADA)', 'dogecoin': 'دوج‌کوین (DOGE)',
@@ -46,20 +46,11 @@ CURRENCIES = {
     'band-protocol': 'بند پروتکل (BAND)', 'cartesi': 'کارتزی (CTSI)', 'orchid-protocol': 'ارکید (OXT)', 'nkn': 'ان‌کی‌ان (NKN)'
 }
 
-# Language dictionaries
+# دیکشنری زبان‌ها
 LANGUAGES = {
     'en': {
-        'welcome': (
-            "Welcome to Crypto Bot, your advanced crypto tracking tool:\n"
-            "📊 View real-time cryptocurrency prices\n"
-            "⏳ Set price alerts for specific levels\n"
-            "📉 Access analytical charts\n"
-            "📅 Receive daily price reports\n"
-            "🔎 Search for your desired cryptocurrencies\n"
-            "For starting, use /start\n"
-            "For guidance, enter /help"
-        ),
-        'price': "Currencies",
+        'welcome': "Welcome to Crypto Bot!\nChoose an option:",
+        'price': "Prices",
         'set_alert': "Set Alert",
         'alerts_list': "View Alerts",
         'language': "Change Language",
@@ -100,14 +91,14 @@ LANGUAGES = {
             "Developer: Fatemeh Ziaei\n\n"
             "Student ID: 02121112705031\n\n"
             "Supervisor: Dr. Faezeh Mokhtar Abadi\n\n"
-            "University: Al-Zahra National Skills University, Kermanو Iran\n\n"
+            "University: Al-Zahra National Skills University, Kerman, Iran\n\n"
             "Project Goal: Build a crypto tracking bot\n\n\n"
             "** Bachelor's Thesis **"
         ),
         'help': (
             "Crypto Bot Help:\n"
             "- /start: Start the bot and see the main menu\n"
-            "- Currencies: View current prices of cryptocurrencies\n"
+            "- Prices: View current prices of cryptocurrencies\n"
             "- Set Alert: Set a price alert for a coin\n"
             "- View Alerts: See and manage your alerts\n"
             "- Chart: Get a chart link for a coin\n"
@@ -116,20 +107,13 @@ LANGUAGES = {
             "- My Data: View your saved data\n"
             "- Change Language: Switch between English and Persian\n"
             "- About Developer: Learn about the developer"
-        )
+        ),
+        'convert_message': "The price of {coin} is equivalent to {price_irr:,} IRR",
+        'back_to_menu': "Back to Menu"
     },
     'fa': {
-        'welcome': (
-            "به ربات کریپتو خوش آمدید، ابزاری پیشرفته برای رصد بازار ارزهای دیجیتال:\n"
-            "📊 مشاهده قیمت‌های لحظه‌ای ارزها\n"
-            "⏳ تنظیم هشدار برای قیمت‌های خاص\n"
-            "📉 دسترسی به نمودارهای تحلیلی\n"
-            "📅 دریافت گزارش روزانه قیمت‌ها\n"
-            "🔎 جستجوی سریع ارزهای دلخواه\n"
-            "برای شروع، از /start استفاده کنید\n"
-            "برای راهنمایی، /help را وارد نمایید"
-        ),
-        'price': "ارزها",
+        'welcome': "به ربات کریپتو خوش آمدید، ابزاری پیشرفته برای رصد بازار ارزهای دیجیتال:\n",
+        'price': "قیمت ارز",
         'set_alert': "تنظیم هشدار",
         'alerts_list': "مشاهده هشدارها",
         'language': "تغییر زبان",
@@ -177,7 +161,7 @@ LANGUAGES = {
         'help': (
             "راهنمایی ربات کریپتو:\n"
             "- /start: شروع ربات و نمایش منوی اصلی\n"
-            "- ارزها: مشاهده قیمت فعلی ارزهای دیجیتال\n"
+            "- قیمت ارز: مشاهده قیمت فعلی ارزهای دیجیتال\n"
             "- تنظیم هشدار: تنظیم هشدار قیمت برای یک ارز\n"
             "- مشاهده هشدارها: دیدن و مدیریت هشدارهای شما\n"
             "- نمودار: دریافت لینک نمودار یک ارز\n"
@@ -186,11 +170,13 @@ LANGUAGES = {
             "- داده‌های من: مشاهده داده‌های ذخیره‌شده شما\n"
             "- تغییر زبان: تغییر بین فارسی و انگلیسی\n"
             "- معرفی توسعه‌دهنده: اطلاعات درباره توسعه‌دهنده"
-        )
+        ),
+        'convert_message': "قیمت {coin} معادل {price_irr:,} ریال است",
+        'back_to_menu': "بازگشت به منو"
     }
 }
 
-# Data storage with PostgreSQL
+# کلاس ذخیره‌سازی با دیتابیس PostgreSQL
 class Storage:
     def __init__(self):
         self.conn = psycopg2.connect(os.getenv('DATABASE_URL'), cursor_factory=RealDictCursor)
@@ -242,7 +228,7 @@ class Storage:
 
 storage = Storage()
 
-# Get crypto price from CoinGecko
+# تابع دریافت قیمت ارز از CoinGecko
 def get_crypto_price(coin_id):
     try:
         url = f"{COINGECKO_API}/simple/price?ids={coin_id}&vs_currencies=usd&include_24hr_change=true"
@@ -251,13 +237,13 @@ def get_crypto_price(coin_id):
         data = response.json()
         price = data[coin_id]['usd']
         change_24h = data[coin_id]['usd_24h_change']
-        logger.info(f"Fetched price for {coin_id}: ${price}")
+        logger.info(f"دریافت قیمت برای {coin_id}: ${price}")
         return price, change_24h
     except Exception as e:
-        logger.error(f"Error fetching price for {coin_id}: {e}")
+        logger.error(f"خطا در دریافت قیمت برای {coin_id}: {e}")
         return None, None
 
-# Check alerts
+# تابع چک کردن هشدارها
 async def check_alerts(context: ContextTypes.DEFAULT_TYPE):
     try:
         ids = ','.join(CURRENCIES.keys())
@@ -267,7 +253,7 @@ async def check_alerts(context: ContextTypes.DEFAULT_TYPE):
         data = response.json()
         current_prices = {coin: data[coin]['usd'] for coin in CURRENCIES if coin in data}
     except Exception as e:
-        logger.error(f"Error fetching prices in check_alerts: {e}")
+        logger.error(f"خطا در دریافت قیمت‌ها در چک کردن هشدارها: {e}")
         return
 
     with storage.conn.cursor() as cur:
@@ -296,7 +282,7 @@ async def check_alerts(context: ContextTypes.DEFAULT_TYPE):
         storage.save_data()
     storage.load_data()
 
-# Daily report
+# تابع ارسال گزارش روزانه
 async def daily_report(context: ContextTypes.DEFAULT_TYPE):
     try:
         ids = ','.join(CURRENCIES.keys())
@@ -305,7 +291,7 @@ async def daily_report(context: ContextTypes.DEFAULT_TYPE):
         data = response.json()
         prices = {coin: data[coin]['usd'] for coin in CURRENCIES if coin in data}
     except Exception as e:
-        logger.error(f"Error fetching prices for daily report: {e}")
+        logger.error(f"خطا در دریافت قیمت‌ها برای گزارش روزانه: {e}")
         return
 
     for user_id, user_data in storage.users.items():
@@ -317,7 +303,7 @@ async def daily_report(context: ContextTypes.DEFAULT_TYPE):
                 report.append(f"{coin_name}: ${price}")
             await context.bot.send_message(chat_id=user_id, text="\n".join(report))
 
-# Start command
+# تابع شروع ربات
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = str(update.effective_user.id)
     first_name = update.effective_user.first_name or "Unknown"
@@ -326,7 +312,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     with storage.conn.cursor() as cur:
         cur.execute("""
             INSERT INTO users (user_id, lang, daily_report, first_name, last_name)
-            VALUES (%s, %s, %s, %s, %s)
+            VALUES (%s, % надійністьs, %s, %s, %s)
             ON CONFLICT (user_id) DO UPDATE SET first_name = %s, last_name = %s
         """, (user_id, 'en', False, first_name, last_name, first_name, last_name))
         storage.save_data()
@@ -335,8 +321,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     lang = storage.users[user_id]['lang']
     daily_status = LANGUAGES[lang]['daily_on'] if storage.users[user_id]['daily_report'] else LANGUAGES[lang]['daily_off']
     
-    logger.info(f"Current data: {storage.users}")
-    logger.info(f"Current alerts: {storage.alerts}")
+    logger.info(f"داده‌های فعلی: {storage.users}")
+    logger.info(f"هشدارهای فعلی: {storage.alerts}")
     
     keyboard = [
         [InlineKeyboardButton(LANGUAGES[lang]['price'], callback_data='price_0'),
@@ -350,15 +336,18 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton(LANGUAGES[lang]['developer'], callback_data='developer')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text(LANGUAGES[lang]['welcome'], reply_markup=reply_markup)
+    if update.message:
+        await update.message.reply_text(LANGUAGES[lang]['welcome'], reply_markup=reply_markup)
+    elif update.callback_query:
+        await update.callback_query.edit_message_text(LANGUAGES[lang]['welcome'], reply_markup=reply_markup)
 
-# Help command
+# تابع راهنما
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = str(update.effective_user.id)
     lang = storage.users.get(user_id, {}).get('lang', 'en')
     await update.message.reply_text(LANGUAGES[lang]['help'])
 
-# Button handler
+# تابع مدیریت دکمه‌ها
 async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -373,7 +362,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if action in ('price', 'alert', 'chart') and len(data_parts) == 2:
         try:
-            page = int(data_parts[1])  # Pagination case
+            page = int(data_parts[1])  # حالت صفحه‌بندی
             start_idx = page * items_per_page
             end_idx = min(start_idx + items_per_page, len(coins))
             keyboard = []
@@ -396,11 +385,12 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 nav_row.append(InlineKeyboardButton(LANGUAGES[lang]['next_page'], callback_data=f"{action}_{page+1}"))
             if nav_row:
                 keyboard.append(nav_row)
+            keyboard.append([InlineKeyboardButton(LANGUAGES[lang]['back_to_menu'], callback_data='back_to_menu')])
             await query.edit_message_text(
                 LANGUAGES[lang]['select_coin'].format(page=page+1, total_pages=total_pages),
                 reply_markup=InlineKeyboardMarkup(keyboard)
             )
-        except ValueError:  # Coin selection case
+        except ValueError:  # حالت انتخاب ارز
             coin = data_parts[1]
             if action == 'price':
                 price, change = get_crypto_price(coin)
@@ -411,7 +401,8 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         f"{LANGUAGES[lang]['current_price'].format(coin=coin_name, price=price)}\n"
                         f"{LANGUAGES[lang]['change_24h'].format(change=change_str)}",
                         reply_markup=InlineKeyboardMarkup([
-                            [InlineKeyboardButton(LANGUAGES[lang]['convert_to_irr'], callback_data=f"convert_to_irr_{coin}_{price}")]
+                            [InlineKeyboardButton(LANGUAGES[lang]['convert_to_irr'], callback_data=f"convert_to_irr_{coin}_{price}")],
+                            [InlineKeyboardButton(LANGUAGES[lang]['back_to_menu'], callback_data='back_to_menu')]
                         ])
                     )
                 else:
@@ -419,48 +410,67 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
             elif action == 'alert':
                 context.user_data['alert_coin'] = coin
                 coin_name = CURRENCIES[coin] if lang == 'fa' else coin.capitalize()
-                await query.edit_message_text(LANGUAGES[lang]['enter_price'].format(coin=coin_name))
+                await query.edit_message_text(
+                    LANGUAGES[lang]['enter_price'].format(coin=coin_name),
+                    reply_markup=InlineKeyboardMarkup([
+                        [InlineKeyboardButton(LANGUAGES[lang]['back_to_menu'], callback_data='back_to_menu')]
+                    ])
+                )
             elif action == 'chart':
                 coin_name = CURRENCIES[coin] if lang == 'fa' else coin.capitalize()
-                chart_url = f"https://www.tradingview.com/chart/?symbol={coin.upper()}USD"
+                # اصلاح لینک نمودار برای سازگاری با TradingView
+                symbol = coin.upper() if coin == 'bitcoin' else f"BINANCE:{coin.upper()}USDT"  # استفاده از جفت USDT برای اکثر ارزها
+                chart_url = f"https://www.tradingview.com/chart/?symbol={symbol}"
                 await query.edit_message_text(
-                    LANGUAGES[lang]['chart_link'].format(coin=coin_name, url=chart_url)
+                    LANGUAGES[lang]['chart_link'].format(coin=coin_name, url=chart_url),
+                    reply_markup=InlineKeyboardMarkup([
+                        [InlineKeyboardButton(LANGUAGES[lang]['back_to_menu'], callback_data='back_to_menu')]
+                    ])
                 )
 
     elif action == 'convert_to_irr':
         coin = data_parts[1]
-        price = float(data_parts[2])  # قیمت دلاری که قبلاً دریافت شده
-        price_irr = price * USD_TO_IRR  # تبدیل به ریال
+        price = float(data_parts[2])
+        price_irr = price * USD_TO_IRR
         coin_name = CURRENCIES[coin] if lang == 'fa' else coin.capitalize()
-        price_irr_str = "{:,.0f}".format(price_irr)  # فرمت‌دهی با کاما و بدون اعشار
-        message = (
-            f"{coin_name}:\n"
-            f"Price in USD: ${price}\n"
-            f"Price in IRR: {price_irr_str} IRR"
-        ) if lang == 'en' else (
-            f"{coin_name}:\n"
-            f"قیمت به دلار: ${price}\n"
-            f"قیمت به ریال: {price_irr_str} IRR"
+        price_irr_str = "{:,.0f}".format(price_irr)
+        await query.message.reply_text(
+            LANGUAGES[lang]['convert_message'].format(coin=coin_name, price_irr=price_irr_str),
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton(LANGUAGES[lang]['back_to_menu'], callback_data='back_to_menu')]
+            ])
         )
-        await query.message.reply_text(message)  # ارسال پیام جدید
 
     elif query.data == 'alerts_list':
         alerts = storage.alerts.get(user_id, [])
         if not alerts:
-            await query.edit_message_text(LANGUAGES[lang]['alerts_empty'])
+            await query.edit_message_text(
+                LANGUAGES[lang]['alerts_empty'],
+                reply_markup=InlineKeyboardMarkup([
+                    [InlineKeyboardButton(LANGUAGES[lang]['back_to_menu'], callback_data='back_to_menu')]
+                ])
+            )
         else:
             alert_list = [LANGUAGES[lang]['alerts_title']]
             for alert in alerts:
                 coin_name = CURRENCIES[alert['coin']] if lang == 'fa' else alert['coin'].capitalize()
                 alert_list.append(f"{coin_name}: ${alert['price']}")
             alert_list.append("")  # خط خالی قبل از دکمه
-            keyboard = [[InlineKeyboardButton(LANGUAGES[lang]['delete_alert'], callback_data='delete_menu')]]
+            keyboard = [
+                [InlineKeyboardButton(LANGUAGES[lang]['delete_alert'], callback_data='delete_menu')],
+                [InlineKeyboardButton(LANGUAGES[lang]['back_to_menu'], callback_data='back_to_menu')]
+            ]
             await query.edit_message_text("\n".join(alert_list), reply_markup=InlineKeyboardMarkup(keyboard))
 
     elif query.data == 'delete_menu':
         alerts = storage.alerts.get(user_id, [])
         if not alerts:
-            await query.edit_message_text(LANGUAGES[lang]['alerts_empty'])
+            await query.edit_message_text(
+                LANGUAGES[lang]['alerts_empty'],
+                reply_markup=InlineKeyboardMarkup([
+                    [InlineKeyboardButton(LANGUAGES[lang]['back_to_menu'], callback_data='back_to_menu')]
+                ])
+            )
         else:
             keyboard = []
             for i, alert in enumerate(alerts):
@@ -469,6 +479,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     f"{coin_name}: ${alert['price']}",
                     callback_data=f"delete_alert_{i}"
                 )])
+            keyboard.append([InlineKeyboardButton(LANGUAGES[lang]['back_to_menu'], callback_data='back_to_menu')])
             await query.edit_message_text(
                 LANGUAGES[lang]['delete_menu'],
                 reply_markup=InlineKeyboardMarkup(keyboard)
@@ -485,14 +496,20 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     cur.execute("DELETE FROM alerts WHERE id = %s", (alert_ids[alert_index],))
                     storage.save_data()
                     storage.load_data()
-            await query.edit_message_text(LANGUAGES[lang]['alert_deleted'])
+            await query.edit_message_text(
+                LANGUAGES[lang]['alert_deleted'],
+                reply_markup=InlineKeyboardMarkup([
+                    [InlineKeyboardButton(LANGUAGES[lang]['back_to_menu'], callback_data='back_to_menu')]
+                ])
+            )
         else:
             await button(update, context)  # برگشت به لیست هشدارها
 
     elif query.data == 'language':
         keyboard = [
             [InlineKeyboardButton("English", callback_data='lang_en'),
-             InlineKeyboardButton("فارسی", callback_data='lang_fa')]
+             InlineKeyboardButton("فارسی", callback_data='lang_fa')],
+            [InlineKeyboardButton(LANGUAGES[lang]['back_to_menu'], callback_data='back_to_menu')]
         ]
         await query.edit_message_text(
             "Select language / زبان را انتخاب کنید:",
@@ -506,14 +523,28 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
             storage.save_data()
         storage.load_data()
         message = LANGUAGES[lang]['daily_report_enabled'] if new_status else LANGUAGES[lang]['daily_report_disabled']
-        await query.edit_message_text(message)
-        await start(update, context)
+        await query.edit_message_text(
+            message,
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton(LANGUAGES[lang]['back_to_menu'], callback_data='back_to_menu')]
+            ])
+        )
 
     elif query.data == 'developer':
-        await query.edit_message_text(LANGUAGES[lang]['developer_info'])
+        await query.edit_message_text(
+            LANGUAGES[lang]['developer_info'],
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton(LANGUAGES[lang]['back_to_menu'], callback_data='back_to_menu')]
+            ])
+        )
 
     elif query.data == 'search':
-        await query.edit_message_text(LANGUAGES[lang]['search_prompt'])
+        await query.edit_message_text(
+            LANGUAGES[lang]['search_prompt'],
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton(LANGUAGES[lang]['back_to_menu'], callback_data='back_to_menu')]
+            ])
+        )
         context.user_data['search_mode'] = True
 
     elif query.data == 'my_data':
@@ -528,7 +559,12 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"{LANGUAGES[lang]['my_data_report'].format(status=daily_status)}\n"
             f"{LANGUAGES[lang]['my_data_alerts'].format(alerts=alerts_text)}"
         )
-        await query.edit_message_text(data_text)
+        await query.edit_message_text(
+            data_text,
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton(LANGUAGES[lang]['back_to_menu'], callback_data='back_to_menu')]
+            ])
+        )
 
     elif query.data.startswith('lang_'):
         new_lang = query.data.split('_')[1]
@@ -536,9 +572,12 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
             cur.execute("UPDATE users SET lang = %s WHERE user_id = %s", (new_lang, user_id))
             storage.save_data()
         storage.load_data()
+        await start(update, context)  # نمایش منو با زبان جدید
+
+    elif query.data == 'back_to_menu':
         await start(update, context)
 
-# Handle price input for alerts and search
+# تابع مدیریت پیام‌های ورودی
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = str(update.effective_user.id)
     lang = storage.users[user_id]['lang']
@@ -560,12 +599,20 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             
             coin_name = CURRENCIES[coin] if lang == 'fa' else coin.capitalize()
             await update.message.reply_text(
-                LANGUAGES[lang]['alert_set'].format(coin=coin_name, price=target_price)
+                LANGUAGES[lang]['alert_set'].format(coin=coin_name, price=target_price),
+                reply_markup=InlineKeyboardMarkup([
+                    [InlineKeyboardButton(LANGUAGES[lang]['back_to_menu'], callback_data='back_to_menu')]
+                ])
             )
             del context.user_data['alert_coin']
             storage.load_data()
         except ValueError:
-            await update.message.reply_text("Please enter a valid number" if lang == 'en' else "لطفاً یک عدد معتبر وارد کنید")
+            await update.message.reply_text(
+                "Please enter a valid number" if lang == 'en' else "لطفاً یک عدد معتبر وارد کنید",
+                reply_markup=InlineKeyboardMarkup([
+                    [InlineKeyboardButton(LANGUAGES[lang]['back_to_menu'], callback_data='back_to_menu')]
+                ])
+            )
 
     elif context.user_data.get('search_mode', False):
         search_term = update.message.text.lower()
@@ -581,13 +628,20 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 reply_markup=InlineKeyboardMarkup([
                     [InlineKeyboardButton(LANGUAGES[lang]['price'], callback_data=f"price_{found}"),
                      InlineKeyboardButton(LANGUAGES[lang]['set_alert'], callback_data=f"alert_{found}")],
-                    [InlineKeyboardButton(LANGUAGES[lang]['chart'], callback_data=f"chart_{found}")]
+                    [InlineKeyboardButton(LANGUAGES[lang]['chart'], callback_data=f"chart_{found}")],
+                    [InlineKeyboardButton(LANGUAGES[lang]['back_to_menu'], callback_data='back_to_menu')]
                 ])
             )
         else:
-            await update.message.reply_text(LANGUAGES[lang]['search_no_result'])
+            await update.message.reply_text(
+                LANGUAGES[lang]['search_no_result'],
+                reply_markup=InlineKeyboardMarkup([
+                    [InlineKeyboardButton(LANGUAGES[lang]['back_to_menu'], callback_data='back_to_menu')]
+                ])
+            )
         del context.user_data['search_mode']
 
+# تابع اصلی برنامه
 def main():
     application = Application.builder().token('8003905325:AAGaLlv41FUe9RgHjFmeNDLrxSQAcWO7KXE').build()
     
