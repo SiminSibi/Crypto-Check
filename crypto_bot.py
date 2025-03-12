@@ -312,7 +312,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     with storage.conn.cursor() as cur:
         cur.execute("""
             INSERT INTO users (user_id, lang, daily_report, first_name, last_name)
-            VALUES (%s, % надійністьs, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s)
             ON CONFLICT (user_id) DO UPDATE SET first_name = %s, last_name = %s
         """, (user_id, 'en', False, first_name, last_name, first_name, last_name))
         storage.save_data()
@@ -340,7 +340,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(LANGUAGES[lang]['welcome'], reply_markup=reply_markup)
     elif update.callback_query:
         await update.callback_query.edit_message_text(LANGUAGES[lang]['welcome'], reply_markup=reply_markup)
-
 # تابع راهنما
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = str(update.effective_user.id)
