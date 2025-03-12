@@ -462,7 +462,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data_parts = query.data.split('_')
     action = data_parts[0]
 
-    if action in ('price', 'alert', 'chart') and len(data_parts) == 2:
+    if action in ('price', 'alert', 'chart'):
         try:
             page = int(data_parts[1])  # حالت صفحه‌بندی
             start_idx = page * items_per_page
@@ -542,19 +542,28 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         ])
                     )
 
-            elif action == 'convert_to_irr':
-                coin = data_parts[1]
-                price = float(data_parts[2])
-                price_irr = price * USD_TO_IRR
-                coin_name = CURRENCIES[coin] if lang == 'fa' else coin.capitalize()
-                price_irr_str = "{:,.0f}".format(price_irr)
-                await query.message.reply_text(
-                    LANGUAGES[lang]['convert_message'].format(coin=coin_name, price_irr=price_irr_str),
-                    reply_markup=InlineKeyboardMarkup([
-                        [InlineKeyboardButton(LANGUAGES[lang]['back_to_menu'], callback_data='back_to_menu')]
-                    ])
-                )
-
+    elif action == 'convert_to_irr':
+        try:
+            coin = data_parts[1]
+            price = float(data_parts[2])
+            price_irr = price * USD_TO_IRR
+            coin_name = CURRENCIES[coin] if lang == 'fa' else coin.capitalize()
+            price_irr_str = "{:,.0f}".format(price_irr)
+            await query.edit_message_text(
+                LANGUAGES[lang]['convert_message'].format(coin=coin_name, price_irr=price_irr_str),
+                reply_markup=InlineKeyboardMarkup([
+                    [InlineKeyboardButton(LANGUAGES[lang]['back_to_menu'], callback_data='back_to_menu')]
+                ])
+            )
+        except (IndexError, ValueError) as e:
+            logger.error(f"خطا در تبدیل به ریال: {e}")
+            await query.edit_message_text(
+                "خطا در تبدیل به ریال" if lang == 'fa' else "Error converting to IRR",
+                reply_markup=InlineKeyboardMarkup([
+                    [InlineKeyboardButton(LANGUAGES[lang]['back_to_menu'], callback_data='back_to_menu')]
+                ])
+            )
+            
     elif query.data == 'alerts_list':
         alerts = storage.alerts.get(user_id, [])
         if not alerts:
