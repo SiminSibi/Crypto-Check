@@ -155,8 +155,8 @@ LANGUAGES = {
         'daily_on': "روشن",
         'daily_off': "خاموش",
         'daily_report_text': "📅 گزارش روزانه کریپتو:",
-        'daily_report_enabled': "گزارش روزانه برای شما فعال شد. هر روز ساعت ۶:۰۰ صبح به وقت تهران، گزارشی از قیمت ۱۰ ارز برتر ارسال می‌شود.",
-        'daily_report_disabled': "گزارش روزانه خاموش شد.",
+        'daily_report_enabled': "گزارش روزانه برای شما فعال شد. هر روز ساعت ۶:۰۰ صبح به وقت تهران، گزارشی از قیمت ۱۰ ارز برتر ارسال می‌شود。",
+        'daily_report_disabled': "گزارش روزانه خاموش شد。",
         'search_prompt': "نام ارز را وارد کنید (فارسی یا انگلیسی):",
         'search_result': "پیدا شد: {coin}",
         'search_no_result': "ارزی پیدا نشد!",
@@ -411,7 +411,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         f"{LANGUAGES[lang]['current_price'].format(coin=coin_name, price=price)}\n"
                         f"{LANGUAGES[lang]['change_24h'].format(change=change_str)}",
                         reply_markup=InlineKeyboardMarkup([
-                            [InlineKeyboardButton(LANGUAGES[lang]['convert_to_irr'], callback_data=f"convert_to_irr_{coin}")]
+                            [InlineKeyboardButton(LANGUAGES[lang]['convert_to_irr'], callback_data=f"convert_to_irr_{coin}_{price}")]
                         ])
                     )
                 else:
@@ -428,23 +428,22 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 )
 
     elif action == 'convert_to_irr':
-    coin = data_parts[1]
-    price, change = get_crypto_price(coin)
-    if price is not None:
-        price_irr = price * USD_TO_IRR  # تبدیل دلار به ریال
-        logger.info(f"Converted {coin} price to IRR: {price_irr}")  # لاگ برای دیباگ
+        coin = data_parts[1]
+        price = float(data_parts[2])  # قیمت دلاری که قبلاً دریافت شده
+        price_irr = price * USD_TO_IRR  # تبدیل به ریال
         coin_name = CURRENCIES[coin] if lang == 'fa' else coin.capitalize()
-        change_str = f"{change:+.2f}"
-        price_irr_str = "{:,.0f}".format(price_irr)  # فرمت‌دهی ساده‌تر
-        await query.edit_message_text(
-            f"{LANGUAGES[lang]['current_price'].format(coin=coin_name, price=price)}\n"
-            f"{LANGUAGES[lang]['price_in_irr'].format(coin=coin_name, price_irr=price_irr_str)}\n"
-            f"{LANGUAGES[lang]['change_24h'].format(change=change_str)}"
+        price_irr_str = "{:,.0f}".format(price_irr)  # فرمت‌دهی با کاما و بدون اعشار
+        message = (
+            f"{coin_name}:\n"
+            f"Price in USD: ${price}\n"
+            f"Price in IRR: {price_irr_str} IRR"
+        ) if lang == 'en' else (
+            f"{coin_name}:\n"
+            f"قیمت به دلار: ${price}\n"
+            f"قیمت به ریال: {price_irr_str} IRR"
         )
-    else:
-        await query.edit_message_text("Could not fetch price." if lang == 'en' else "نمی‌توان قیمت را دریافت کرد.")
+        await query.message.reply_text(message)  # ارسال پیام جدید
 
-    
     elif query.data == 'alerts_list':
         alerts = storage.alerts.get(user_id, [])
         if not alerts:
