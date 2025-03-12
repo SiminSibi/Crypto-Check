@@ -17,7 +17,7 @@ COINGECKO_API = "https://api.coingecko.com/api/v3"
 CHECK_INTERVAL = 60  # Check every 1 minute
 USD_TO_IRR = 930000  # 930,000 IRR per USD
 
-# 100 popular cryptocurrencies (بدون تغییر)
+# 100 popular cryptocurrencies
 CURRENCIES = {
     'bitcoin': 'بیت‌کوین (BTC)', 'ethereum': 'اتریوم (ETH)', 'tether': 'تتر (USDT)', 'binancecoin': 'بایننس کوین (BNB)',
     'solana': 'سولانا (SOL)', 'ripple': 'ریپل (XRP)', 'cardano': 'کاردانو (ADA)', 'dogecoin': 'دوج‌کوین (DOGE)',
@@ -49,7 +49,16 @@ CURRENCIES = {
 # Language dictionaries
 LANGUAGES = {
     'en': {
-        "Welcome to Crypto Bot!\nChoose an option:",
+        'welcome': (
+            "Welcome to Crypto Bot, your advanced crypto tracking tool:\n"
+            "📊 View real-time cryptocurrency prices\n"
+            "⏳ Set price alerts for specific levels\n"
+            "📉 Access analytical charts\n"
+            "📅 Receive daily price reports\n"
+            "🔎 Search for your desired cryptocurrencies\n"
+            "For starting, use /start\n"
+            "For guidance, enter /help"
+        ),
         'price': "Currencies",
         'set_alert': "Set Alert",
         'alerts_list': "View Alerts",
@@ -76,7 +85,7 @@ LANGUAGES = {
         'daily_on': "ON",
         'daily_off': "OFF",
         'daily_report_text': "📅 Daily Crypto Report:",
-        'daily_report_enabled': "Daily report enabled for you. Every day at 6:00 AM, a report will be sent with the top 10 crypto prices.",
+        'daily_report_enabled': "Daily report enabled for you. Every day at 6:00 AM Tehran time, a report will be sent with the top 10 crypto prices.",
         'daily_report_disabled': "Daily report disabled.",
         'search_prompt': "Enter coin name (English or Persian):",
         'search_result': "Found: {coin}",
@@ -91,7 +100,7 @@ LANGUAGES = {
             "Developer: Fatemeh Ziaei\n\n"
             "Student ID: 02121112705031\n\n"
             "Supervisor: Dr. Faezeh Mokhtar Abadi\n\n"
-            "University: Al-Zahra National Skills University, Kerman, Iran\n\n"
+            "University: Al-Zahra National Skills University, Kermanو Iran\n\n"
             "Project Goal: Build a crypto tracking bot\n\n\n"
             "** Bachelor's Thesis **"
         ),
@@ -110,7 +119,16 @@ LANGUAGES = {
         )
     },
     'fa': {
-        'welcome': "به ربات کریپتو خوش آمدید!\nیک گزینه را انتخاب کنید:",
+        'welcome': (
+            "به ربات کریپتو خوش آمدید، ابزاری پیشرفته برای رصد بازار ارزهای دیجیتال:\n"
+            "📊 مشاهده قیمت‌های لحظه‌ای ارزها\n"
+            "⏳ تنظیم هشدار برای قیمت‌های خاص\n"
+            "📉 دسترسی به نمودارهای تحلیلی\n"
+            "📅 دریافت گزارش روزانه قیمت‌ها\n"
+            "🔎 جستجوی سریع ارزهای دلخواه\n"
+            "برای شروع، از /start استفاده کنید\n"
+            "برای راهنمایی، /help را وارد نمایید"
+        ),
         'price': "ارزها",
         'set_alert': "تنظیم هشدار",
         'alerts_list': "مشاهده هشدارها",
@@ -137,7 +155,7 @@ LANGUAGES = {
         'daily_on': "روشن",
         'daily_off': "خاموش",
         'daily_report_text': "📅 گزارش روزانه کریپتو:",
-        'daily_report_enabled': "گزارش روزانه برای شما فعال شد. هر روز ساعت ۶:۰۰ صبح، گزارشی از قیمت ۱۰ ارز برتر ارسال می‌شود.",
+        'daily_report_enabled': "گزارش روزانه برای شما فعال شد. هر روز ساعت ۶:۰۰ صبح به وقت تهران، گزارشی از قیمت ۱۰ ارز برتر ارسال می‌شود.",
         'daily_report_disabled': "گزارش روزانه خاموش شد.",
         'search_prompt': "نام ارز را وارد کنید (فارسی یا انگلیسی):",
         'search_result': "پیدا شد: {coin}",
@@ -172,7 +190,7 @@ LANGUAGES = {
     }
 }
 
-# Data storage with PostgreSQL (بدون تغییر)
+# Data storage with PostgreSQL
 class Storage:
     def __init__(self):
         self.conn = psycopg2.connect(os.getenv('DATABASE_URL'), cursor_factory=RealDictCursor)
@@ -224,7 +242,7 @@ class Storage:
 
 storage = Storage()
 
-# Get crypto price from CoinGecko (بدون تغییر)
+# Get crypto price from CoinGecko
 def get_crypto_price(coin_id):
     try:
         url = f"{COINGECKO_API}/simple/price?ids={coin_id}&vs_currencies=usd&include_24hr_change=true"
@@ -239,7 +257,7 @@ def get_crypto_price(coin_id):
         logger.error(f"Error fetching price for {coin_id}: {e}")
         return None, None
 
-# Check alerts (بدون تغییر)
+# Check alerts
 async def check_alerts(context: ContextTypes.DEFAULT_TYPE):
     try:
         ids = ','.join(CURRENCIES.keys())
@@ -278,7 +296,7 @@ async def check_alerts(context: ContextTypes.DEFAULT_TYPE):
         storage.save_data()
     storage.load_data()
 
-# Daily report (بدون تغییر)
+# Daily report
 async def daily_report(context: ContextTypes.DEFAULT_TYPE):
     try:
         ids = ','.join(CURRENCIES.keys())
@@ -518,7 +536,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         storage.load_data()
         await start(update, context)
 
-# Handle price input for alerts and search (بدون تغییر)
+# Handle price input for alerts and search
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = str(update.effective_user.id)
     lang = storage.users[user_id]['lang']
@@ -573,7 +591,7 @@ def main():
     
     scheduler = AsyncIOScheduler()
     scheduler.add_job(check_alerts, 'interval', seconds=CHECK_INTERVAL, args=[application])
-    scheduler.add_job(daily_report, 'cron', hour=2, minute=30, args=[application])
+    scheduler.add_job(daily_report, 'cron', hour=2, minute=30, args=[application])  # 6:00 AM Tehran = 2:30 AM UTC
     scheduler.start()
 
     application.add_handler(CommandHandler("start", start))
